@@ -24,7 +24,7 @@ export default function Saad() {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM }),
+      body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM, member: "saad" }),
     });
     const data = await res.json();
     setMessages([...newMessages, { role: "assistant", content: data.reply }]);

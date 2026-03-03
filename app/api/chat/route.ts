@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, systemPrompt } = await req.json();
     const response = await client.messages.create({
-      model: "claude-sonnet-4-5-20251001",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
       system: systemPrompt,
       messages,

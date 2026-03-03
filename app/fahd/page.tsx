@@ -27,13 +27,21 @@ export default function Fahd() {
     setInput("");
     setLoading(true);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM }),
-    });
-    const data = await res.json();
-    setMessages([...newMessages, { role: "assistant", content: data.reply }]);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages([...newMessages, { role: "assistant", content: data.reply }]);
+      } else {
+        setMessages([...newMessages, { role: "assistant", content: `خطأ: ${data.error}` }]);
+      }
+    } catch (e: any) {
+      setMessages([...newMessages, { role: "assistant", content: `خطأ في الاتصال: ${e.message}` }]);
+    }
     setLoading(false);
   }
 

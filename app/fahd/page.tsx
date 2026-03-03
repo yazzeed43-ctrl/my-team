@@ -59,7 +59,7 @@ export default function Fahd() {
 
   async function send() {
     if (!input.trim() && !image || loading) return;
-    
+
     const content: any[] = [];
     if (image) {
       const base64 = image.split(",")[1];
@@ -79,7 +79,7 @@ export default function Fahd() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM }),
+        body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM, member: "fahd" }),
       });
       const data = await res.json();
       setMessages([...newMessages, { role: "assistant", content: data.reply || `خطأ: ${data.error}` }]);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PASSWORD = "yazed2026";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const cookie = req.cookies.get("auth")?.value;
   
   if (req.nextUrl.pathname === "/login") return NextResponse.next();

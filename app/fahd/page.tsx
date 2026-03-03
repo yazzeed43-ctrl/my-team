@@ -14,10 +14,44 @@ const SYSTEM = `أنت فهد، المدير التنفيذي لفريق من ا
 لغتك: عربي واضح ومباشر، رجل واثق وخبير.
 لا تستخدم markdown، استخدم نصاً عادياً فقط.`;
 
+const PASSWORD = "yazed2026";
+
 export default function Fahd() {
+  const [auth, setAuth] = useState(false);
+  const [pass, setPass] = useState("");
+  const [error, setError] = useState(false);
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function login() {
+    if (pass === PASSWORD) {
+      setAuth(true);
+    } else {
+      setError(true);
+    }
+  }
+
+  if (!auth) return (
+    <div style={{ fontFamily: "'Cairo', sans-serif", background: "#0a0a0f", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", direction: "rtl" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+      <div style={{ background: "#111118", border: "1px solid #1e1e2e", borderRadius: 20, padding: "40px 36px", width: 320, textAlign: "center" }}>
+        <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #c9a84c, #7a5a1e)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 900, color: "#000", margin: "0 auto 20px" }}>ف</div>
+        <h1 style={{ color: "#c9a84c", fontSize: 20, fontWeight: 700, marginBottom: 8 }}>فريقك الخاص</h1>
+        <p style={{ color: "#888899", fontSize: 13, marginBottom: 24 }}>أدخل كلمة السر للدخول</p>
+        <input
+          type="password"
+          value={pass}
+          onChange={e => { setPass(e.target.value); setError(false); }}
+          onKeyDown={e => e.key === "Enter" && login()}
+          placeholder="كلمة السر"
+          style={{ width: "100%", background: "#16161f", border: `1px solid ${error ? "#ef4444" : "#1e1e2e"}`, borderRadius: 12, padding: "11px 15px", color: "#e8e8f0", fontFamily: "'Cairo', sans-serif", fontSize: 14, outline: "none", marginBottom: 12, textAlign: "center" }}
+        />
+        {error && <p style={{ color: "#ef4444", fontSize: 12, marginBottom: 12 }}>كلمة السر غلط</p>}
+        <button onClick={login} style={{ width: "100%", background: "#c9a84c", border: "none", borderRadius: 12, padding: "12px", color: "#000", fontFamily: "'Cairo', sans-serif", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>دخول</button>
+      </div>
+    </div>
+  );
 
   async function send() {
     if (!input.trim() || loading) return;
@@ -48,7 +82,6 @@ export default function Fahd() {
   return (
     <div style={{ fontFamily: "'Cairo', sans-serif", background: "#0a0a0f", minHeight: "100vh", color: "#e8e8f0", direction: "rtl" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
-
       <div style={{ background: "#111118", borderBottom: "1px solid #1e1e2e", padding: "14px 22px", display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg, #c9a84c, #7a5a1e)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900, color: "#000", boxShadow: "0 0 16px rgba(201,168,76,0.3)" }}>ف</div>
         <div>

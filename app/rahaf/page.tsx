@@ -24,7 +24,7 @@ export default function Rahaf() {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM }),
+      body: JSON.stringify({ messages: newMessages, systemPrompt: SYSTEM, member: "rahaf" }),
     });
     const data = await res.json();
     setMessages([...newMessages, { role: "assistant", content: data.reply }]);
@@ -34,7 +34,6 @@ export default function Rahaf() {
   return (
     <div style={{ fontFamily: "'Cairo', sans-serif", background: "#0a0a0f", minHeight: "100vh", color: "#f0e8f0", direction: "rtl" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
-
       <div style={{ background: "#110f14", borderBottom: "1px solid #231e2c", padding: "14px 22px", display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg, #e879a0, #7a2040)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900, color: "#fff", boxShadow: "0 0 16px rgba(232,121,160,0.3)" }}>ر</div>
         <div>

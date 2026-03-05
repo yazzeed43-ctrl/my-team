@@ -15,16 +15,28 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, systemPrompt, member } = await req.json();
 
-    // جيب السياق المشترك من Supabase
+    // حفظ رسالة المستخدم في جدول conversations
+    const lastUserMessage = messages[messages.length - 1];
+
+    if (lastUserMessage?.role === "user") {
+      await supabase.from("conversations").insert({
+        member: member,
+        role: "user",
+        message: JSON.stringify(lastUserMessage.content),
+      });
+    }
+
+    // قراءة المعرفة من جدول knowledge
     let contextStr = "";
+
     if (member) {
       const { data } = await supabase
-        .from("shared_context")
-        .select("key, value")
+        .from("knowledge")
+        .select("key,value")
         .eq("member", member);
 
       if (data && data.length > 0) {
-        contextStr = "\n\n--- معلومات مشتركة ---\n";
+        contextStr = "\n\n--- معلومات محفوظة ---\n";
         contextStr += data.map((r) => `${r.key}: ${r.value}`).join("\n");
       }
     }
@@ -39,11 +51,26 @@ export async function POST(req: NextRequest) {
     });
 
     let text = "";
+
     for (const block of response.content) {
-      if (block.type === "text") text += block.text;
+      if (block.type === "text") {
+        text += block.text;
+      }
     }
+
+    // حفظ رد المساعد في جدول conversations
+    await supabase.from("conversations").insert({
+      member: member,
+      role: "assistant",
+      message: text,
+    });
+
     return NextResponse.json({ reply: text });
+
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }

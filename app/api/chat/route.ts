@@ -13,11 +13,13 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+
     const { messages, systemPrompt, member } = await req.json();
 
-    // حفظ رسالة المستخدم في جدول conversations
+    // آخر رسالة من المستخدم
     const lastUserMessage = messages[messages.length - 1];
 
+    // حفظ رسالة المستخدم
     if (lastUserMessage?.role === "user") {
       await supabase.from("conversations").insert({
         member: member,
@@ -41,7 +43,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const finalSystem = systemPrompt + contextStr;
+    // قراءة المهام من جدول tasks
+    let tasksStr = "";
+
+    if (member) {
+      const { data: tasks } = await supabase
+        .from("tasks")
+        .select("task,status")
+        .eq("member", member)
+        .eq("status", "pending");
+
+      if (tasks && tasks.length > 0) {
+        tasksStr = "\n\n--- المهام الحالية ---\n";
+        tasksStr += tasks.map((t) => `- ${t.task}`).join("\n");
+      }
+    }
+
+    const finalSystem = systemPrompt + contextStr + tasksStr;
 
     const response = await client.messages.create({
       model: "claude-opus-4-5",
@@ -58,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // حفظ رد المساعد في جدول conversations
+    // حفظ رد الموظف
     await supabase.from("conversations").insert({
       member: member,
       role: "assistant",
@@ -68,9 +86,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ reply: text });
 
   } catch (error: any) {
+
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
     );
+
   }
 }

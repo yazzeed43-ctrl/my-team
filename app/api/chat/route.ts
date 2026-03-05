@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       message: text,
     });
 
-    // إذا فهد أنشأ مهمة
+    // إنشاء مهمة تلقائياً
     const taskMatch = text.match(/TASK:\s*member=(\w+)\s*\|\s*task=(.+)/i);
 
     if (taskMatch) {
@@ -96,6 +96,41 @@ export async function POST(req: NextRequest) {
         task: taskText,
         status: "pending",
       });
+
+    }
+
+    // تشغيل اجتماع الفريق
+    if (text.includes("MEETING: team")) {
+
+      const teamMembers = ["rahaf", "noura", "mohammed", "saad"];
+      let meetingReport = "\n\n--- تقرير اجتماع الفريق ---\n";
+
+      for (const m of teamMembers) {
+
+        const memberPrompt = `
+أنت موظف في فريق خاص.
+قدم تقريراً مختصراً من 3 نقاط عن عملك اليومي وتوصية عملية واحدة.
+`;
+
+        const memberResponse = await client.messages.create({
+          model: "claude-opus-4-5",
+          max_tokens: 300,
+          system: memberPrompt,
+          messages: [{ role: "user", content: "اعطني تقريرك اليومي." }],
+        });
+
+        let memberText = "";
+
+        for (const block of memberResponse.content) {
+          if (block.type === "text") {
+            memberText += block.text;
+          }
+        }
+
+        meetingReport += `\n${m.toUpperCase()}:\n${memberText}\n`;
+      }
+
+      text += meetingReport;
 
     }
 

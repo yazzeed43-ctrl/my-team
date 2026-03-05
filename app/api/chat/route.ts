@@ -12,11 +12,11 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
+
   try {
 
     const { messages, systemPrompt, member } = await req.json();
 
-    // آخر رسالة من المستخدم
     const lastUserMessage = messages[messages.length - 1];
 
     // حفظ رسالة المستخدم
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // قراءة المعرفة من جدول knowledge
+    // قراءة المعرفة
     let contextStr = "";
 
     if (member) {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // قراءة المهام من جدول tasks
+    // قراءة المهام
     let tasksStr = "";
 
     if (member) {
@@ -83,6 +83,22 @@ export async function POST(req: NextRequest) {
       message: text,
     });
 
+    // إذا فهد أنشأ مهمة
+    const taskMatch = text.match(/TASK:\s*member=(\w+)\s*\|\s*task=(.+)/i);
+
+    if (taskMatch) {
+
+      const memberName = taskMatch[1];
+      const taskText = taskMatch[2];
+
+      await supabase.from("tasks").insert({
+        member: memberName,
+        task: taskText,
+        status: "pending",
+      });
+
+    }
+
     return NextResponse.json({ reply: text });
 
   } catch (error: any) {
@@ -93,4 +109,5 @@ export async function POST(req: NextRequest) {
     );
 
   }
+
 }

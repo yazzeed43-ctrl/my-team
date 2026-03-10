@@ -1,20 +1,45 @@
 "use client";
 import { useState, useRef } from "react";
 
-const SYSTEM = `أنت نورة، مختصة في محتوى تيك توك والسوشيال ميديا.
-تخصصاتك: كتابة السكريبتات، متابعة الترندات، تحليل الإحصائيات، استراتيجية المحتوى.
-تقدرين تحللين الصور والإحصائيات اللي يرسلها المستخدم.
-لغتك: عربي عصري وخفيف، أنثى، متحمسة وعملية.
-تعطين أفكار محتوى قابلة للتنفيذ فوراً.
-لا تستخدمي markdown، استخدمي نصاً عادياً فقط.
+const SYSTEM = `أنت نورة، مساعد تيك توك المتكامل ليزيد الشريف، وسيط عقاري في مكة المكرمة.
 
-عند أي سؤال عن المحتوى أو الهوك أو الفيديوهات، ابدأي فوراً بتحليل بيانات المستخدم الحقيقية:
-- أفضل فيديو: الصك باسم متوفي - 1790 مشاهدة - متوسط 5.3 ثانية - hook: سؤال مثير
+=== معلومات يزيد ===
+- وسيط عقاري معتمد (FAL) في مكة، مكتب "الرائد للعقار"
+- يملك 16 وحدة إيجارية
+- حساب تيك توك: @yazed14
+- لا يظهر أمام الكاميرا، يفضل voiceover + نص متحرك
+- يستخدم CapCut Desktop للمونتاج
+
+=== إحصائيات التيك توك ===
+- أفضل فيديو: "الصك باسم متوفي" - 1790 مشاهدة - متوسط 5.3 ثانية - hook: سؤال مثير
 - فيديو ضعيف: 239 مشاهدة - متوسط 2.9 ثانية - مشكلة في أول 3 ثواني
 - الجمهور: 94% جدد، ذكور 25-44، السعودية
+- 95.4% من For You Page
 - المشكلة الرئيسية: الاحتفاظ في أول 3 ثواني
 
-ابدأي ردك بما تعرفينه عن حسابه، ثم قدمي توصياتك بناءً على هذي البيانات.`;
+=== أسعار الإيجار في مكة (للمحتوى) ===
+- العزيزية: 25,000-35,000 سنوياً
+- النسيم: 20,000-28,000 سنوياً
+- الشوقية: 18,000-25,000 سنوياً
+- الربوة: 30,000-45,000 سنوياً
+- العوالي: 22,000-32,000 سنوياً
+
+=== قدراتك ===
+1. كتابة السكريبت: تكتبين سكريبت كامل جاهز للتصوير مع hook قوي في أول 3 ثواني
+2. خطوات CapCut: تعطين خطوات مونتاج واضحة خطوة بخطوة
+3. تتبع العملاء: تساعدين يزيد يسجل ويتابع العملاء المهتمين من التعليقات
+4. جدول النشر: تقترحين جدول أسبوعي للمحتوى
+5. تحليل الأداء: تحللين الإحصائيات وتقترحين تحسينات
+6. أفكار المحتوى: تقترحين مواضيع مبنية على ما نجح
+
+=== أسلوب السكريبت الناجح ===
+- Hook: سؤال مثير أو معلومة صادمة في أول 3 ثواني
+- المحتوى: معلومة عملية أو قصة حقيقية
+- الختام: call to action واضح
+
+لغتك: عربي خليجي عصري، مختصر، عملي ومباشر.
+لا تستخدمي markdown، استخدمي نصاً عادياً فقط.
+عند كتابة سكريبت، اكتبيه جاهز للقراءة بدون تعليقات إضافية.`;
 
 const PASSWORD = "yazed2026";
 
@@ -94,26 +119,26 @@ export default function Noura() {
         <div style={{ width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg, #a78bfa, #5b21b6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900, color: "#fff", boxShadow: "0 0 16px rgba(167,139,250,0.3)" }}>ن</div>
         <div>
           <div style={{ fontSize: 17, fontWeight: 700, color: "#a78bfa" }}>نورة</div>
-          <div style={{ fontSize: 11, color: "#8880aa" }}>مختصة تيك توك · ترندات ومحتوى</div>
+          <div style={{ fontSize: 11, color: "#8880aa" }}>مساعد تيك توك المتكامل · @yazed14</div>
         </div>
-        <a href="/fahd" style={{ marginRight: "auto", padding: "6px 14px", background: "transparent", border: "1px solid #1e1a2e", borderRadius: 20, color: "#8880aa", fontSize: 12, textDecoration: "none" }}>← فهد</a>
       </div>
 
       <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14, minHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
         {messages.length === 0 && (
-          <div style={{ background: "#13101a", border: "1px solid #1e1a2e", borderRight: "3px solid #a78bfa", borderRadius: 16, padding: "14px 18px", maxWidth: "75%", fontSize: 14, lineHeight: 1.8 }}>
-            هلا! أنا نورة 📱<br /><br />
-            أقدر أساعدك في:<br />
-            • سكريبتات فيديوهات تيك توك<br />
-            • أحدث الترندات<br />
-            • تحليل إحصائيات حسابك<br />
-            • استراتيجية المحتوى<br /><br />
-            تقدر ترسل نص أو صورة 📎
+          <div style={{ background: "#13101a", border: "1px solid #1e1a2e", borderRight: "3px solid #a78bfa", borderRadius: 16, padding: "14px 18px", maxWidth: "80%", fontSize: 14, lineHeight: 1.9 }}>
+            هلا يزيد! أنا نورة 📱<br /><br />
+            أقدر أساعدك في كل شيء عن تيك توك:<br /><br />
+            سكريبت — اكتب لي الموضوع وأجهز لك سكريبت كامل جاهز للتصوير<br />
+            CapCut — خطوات المونتاج خطوة بخطوة<br />
+            عملاء — سجّل المهتمين من التعليقات وأتابعهم معك<br />
+            جدول — أرتب لك جدول نشر أسبوعي<br />
+            تحليل — أرسل إحصائياتك وأحللها لك<br /><br />
+            وش نبدأ فيه؟
           </div>
         )}
         {messages.map((m, i) => (
           <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-start" : "flex-end" }}>
-            <div style={{ background: m.role === "user" ? "#13101a" : "linear-gradient(135deg, #2a1f5e, #1a1040)", border: `1px solid ${m.role === "user" ? "#1e1a2e" : "#3d2d80"}`, borderRadius: 16, padding: "11px 15px", maxWidth: "75%", fontSize: 14, lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
+            <div style={{ background: m.role === "user" ? "#13101a" : "linear-gradient(135deg, #2a1f5e, #1a1040)", border: `1px solid ${m.role === "user" ? "#1e1a2e" : "#3d2d80"}`, borderRadius: 16, padding: "11px 15px", maxWidth: "80%", fontSize: 14, lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
               {Array.isArray(m.content) ? m.content.map((c: any, j: number) => (
                 c.type === "image" ? <img key={j} src={`data:${c.source.media_type};base64,${c.source.data}`} style={{ maxWidth: 200, borderRadius: 8 }} /> : <span key={j}>{c.text}</span>
               )) : m.content}
@@ -128,7 +153,7 @@ export default function Noura() {
         <div style={{ display: "flex", gap: 10 }}>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
           <button onClick={() => fileRef.current?.click()} style={{ width: 44, height: 44, background: "#13101a", border: "1px solid #1e1a2e", borderRadius: 12, cursor: "pointer", fontSize: 18 }}>📎</button>
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="اسأليني أو أرسلي صورة..." style={{ flex: 1, background: "#13101a", border: "1px solid #1e1a2e", borderRadius: 12, padding: "11px 15px", color: "#f0eaff", fontFamily: "'Cairo', sans-serif", fontSize: 14, outline: "none" }} />
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="اكتب لنورة..." style={{ flex: 1, background: "#13101a", border: "1px solid #1e1a2e", borderRadius: 12, padding: "11px 15px", color: "#f0eaff", fontFamily: "'Cairo', sans-serif", fontSize: 14, outline: "none" }} />
           <button onClick={send} style={{ width: 44, height: 44, background: "linear-gradient(135deg, #a78bfa, #5b21b6)", border: "none", borderRadius: 12, cursor: "pointer", fontSize: 18, color: "#fff" }}>↑</button>
         </div>
       </div>

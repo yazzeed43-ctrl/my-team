@@ -1,5 +1,11 @@
 "use client";
 import { useState, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://bgpybhkkuqrqokkfiksj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJncHliaGtrdXFycW9ra2Zpa3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTA4OTksImV4cCI6MjA4NzI2Njg5OX0.YOq9XIAf1y0IxRNRabtTUhnV_7eadrk7qqVvt5XhHso"
+);
 
 const SYSTEM = `أنت نورة، مساعد تيك توك المتكامل ليزيد الشريف، وسيط عقاري في مكة المكرمة.
 
@@ -25,12 +31,12 @@ const SYSTEM = `أنت نورة، مساعد تيك توك المتكامل لي
 - العوالي: 22,000-32,000 سنوياً
 
 === قدراتك ===
-1. كتابة السكريبت: تكتبين سكريبت كامل جاهز للتصوير مع hook قوي في أول 3 ثواني
-2. خطوات CapCut: تعطين خطوات مونتاج واضحة خطوة بخطوة
-3. تتبع العملاء: تساعدين يزيد يسجل ويتابع العملاء المهتمين من التعليقات
-4. جدول النشر: تقترحين جدول أسبوعي للمحتوى
-5. تحليل الأداء: تحللين الإحصائيات وتقترحين تحسينات
-6. أفكار المحتوى: تقترحين مواضيع مبنية على ما نجح
+1. كتابة السكريبت الكامل جاهز للتصوير
+2. خطوات CapCut خطوة بخطوة
+3. تتبع العملاء المهتمين
+4. جدول نشر أسبوعي
+5. تحليل الإحصائيات
+6. أفكار محتوى مبنية على ما نجح
 
 === أسلوب السكريبت الناجح ===
 - Hook: سؤال مثير أو معلومة صادمة في أول 3 ثواني
@@ -41,6 +47,13 @@ const SYSTEM = `أنت نورة، مساعد تيك توك المتكامل لي
 لا تستخدمي markdown، استخدمي نصاً عادياً فقط.
 عند كتابة سكريبت، اكتبيه جاهز للقراءة بدون تعليقات إضافية.`;
 
+const SUMMARY_PROMPT = `لخصي هذه المحادثة في نقاط قصيرة:
+1. المواضيع اللي تناقشناها
+2. أي عملاء أو leads ذُكروا
+3. أفكار فيديوهات اتفقنا عليها
+4. ملاحظات مهمة
+اكتبي الملخص بالعربي بشكل مختصر وواضح.`;
+
 const PASSWORD = "yazed2026";
 
 export default function Noura() {
@@ -50,6 +63,8 @@ export default function Noura() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +79,34 @@ export default function Noura() {
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  async function saveMemory() {
+    if (messages.length === 0 || saving) return;
+    setSaving(true);
+    try {
+      const textMessages = messages.map(m => ({
+        role: m.role,
+        content: Array.isArray(m.content)
+          ? m.content.filter((c: any) => c.type === "text").map((c: any) => c.text).join(" ")
+          : m.content
+      }));
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: textMessages, systemPrompt: SUMMARY_PROMPT, member: "noura" }),
+      });
+      const data = await res.json();
+      await supabase.from("noura_memory").insert({
+        summary: data.reply || "",
+        notes: `${messages.length} رسالة`
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+    }
+    setSaving(false);
   }
 
   if (!auth) return (
@@ -82,7 +125,6 @@ export default function Noura() {
 
   async function send() {
     if (!input.trim() && !image || loading) return;
-
     const content: any[] = [];
     if (image) {
       const base64 = image.split(",")[1];
@@ -90,14 +132,12 @@ export default function Noura() {
       content.push({ type: "image", source: { type: "base64", media_type: mediaType, data: base64 } });
     }
     if (input.trim()) content.push({ type: "text", text: input });
-
     const userMsg = { role: "user", content };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
     setImage(null);
     setLoading(true);
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -121,6 +161,11 @@ export default function Noura() {
           <div style={{ fontSize: 17, fontWeight: 700, color: "#a78bfa" }}>نورة</div>
           <div style={{ fontSize: 11, color: "#8880aa" }}>مساعد تيك توك المتكامل · @yazed14</div>
         </div>
+        {messages.length > 0 && (
+          <button onClick={saveMemory} style={{ marginRight: "auto", padding: "6px 14px", background: saved ? "#1a3a1a" : "transparent", border: `1px solid ${saved ? "#34d399" : "#1e1a2e"}`, borderRadius: 20, color: saved ? "#34d399" : "#8880aa", fontSize: 12, cursor: "pointer", fontFamily: "'Cairo', sans-serif" }}>
+            {saving ? "جاري الحفظ..." : saved ? "✓ تم الحفظ" : "💾 احفظ المحادثة"}
+          </button>
+        )}
       </div>
 
       <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14, minHeight: "calc(100vh - 160px)", overflowY: "auto" }}>

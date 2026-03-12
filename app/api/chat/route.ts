@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, systemPrompt, member } = await req.json();
 
-    // قراءة المعرفة
+    // قراءة السياق المشترك
     let contextStr = "";
     if (member) {
       const { data } = await supabase
@@ -42,7 +42,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const finalSystem = systemPrompt + contextStr + memoryStr;
+    // قراءة العملاء
+    let leadsStr = "";
+    if (member === "noura") {
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("name, interest, status, notes")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (leads && leads.length > 0) {
+        leadsStr = "\n\n--- العملاء المهتمين ---\n";
+        leadsStr += leads.map((l) => `• ${l.name} | ${l.interest} | ${l.status}${l.notes ? " | " + l.notes : ""}`).join("\n");
+      }
+    }
+
+    const finalSystem = systemPrompt + contextStr + memoryStr + leadsStr + `
+
+=== تعليمات تسجيل العملاء ===
+لما يزيد يقول "سجّل عميل" أو يذكر شخص مهتم، ردّي بهذا الشكل في نهاية ردك:
+LEAD: name=الاسم | interest=الاهتمام | notes=ملاحظات
+
+مثال: LEAD: name=أحمد | interest=شقة في العزيزية غرفتين | notes=تواصل من تعليق فيديو الإيجار`;
 
     const response = await client.messages.create({
       model: "claude-opus-4-5",
@@ -56,6 +76,20 @@ export async function POST(req: NextRequest) {
       if (block.type === "text") {
         text += block.text;
       }
+    }
+
+    // حفظ العميل تلقائياً
+    const leadMatch = text.match(/LEAD:\s*name=([^|]+)\s*\|\s*interest=([^|]+)(?:\s*\|\s*notes=(.+))?/i);
+    if (leadMatch) {
+      await supabase.from("leads").insert({
+        name: leadMatch[1].trim(),
+        interest: leadMatch[2].trim(),
+        notes: leadMatch[3]?.trim() || "",
+        source: "تيك توك",
+        status: "جديد"
+      });
+      // إخفاء السطر التقني من الرد
+      text = text.replace(/LEAD:.*$/gm, "✅ تم تسجيل العميل").trim();
     }
 
     return NextResponse.json({ reply: text });

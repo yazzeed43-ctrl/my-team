@@ -12,54 +12,37 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-
   try {
-
     const { messages, systemPrompt, member } = await req.json();
-
-    const lastUserMessage = messages[messages.length - 1];
-
-    // حفظ رسالة المستخدم
-    if (lastUserMessage?.role === "user") {
-      await supabase.from("conversations").insert({
-        member: member,
-        role: "user",
-        message: JSON.stringify(lastUserMessage.content),
-      });
-    }
 
     // قراءة المعرفة
     let contextStr = "";
-
     if (member) {
       const { data } = await supabase
-        .from("knowledge")
+        .from("shared_context")
         .select("key,value")
         .eq("member", member);
-
       if (data && data.length > 0) {
         contextStr = "\n\n--- معلومات محفوظة ---\n";
         contextStr += data.map((r) => `${r.key}: ${r.value}`).join("\n");
       }
     }
 
-    // قراءة المهام
-    let tasksStr = "";
-
-    if (member) {
-      const { data: tasks } = await supabase
-        .from("tasks")
-        .select("task,status")
-        .eq("member", member)
-        .eq("status", "pending");
-
-      if (tasks && tasks.length > 0) {
-        tasksStr = "\n\n--- المهام الحالية ---\n";
-        tasksStr += tasks.map((t) => `- ${t.task}`).join("\n");
+    // قراءة ذاكرة نورة
+    let memoryStr = "";
+    if (member === "noura") {
+      const { data: memories } = await supabase
+        .from("noura_memory")
+        .select("summary, session_date")
+        .order("session_date", { ascending: false })
+        .limit(3);
+      if (memories && memories.length > 0) {
+        memoryStr = "\n\n--- ذاكرة المحادثات السابقة ---\n";
+        memoryStr += memories.map((m) => `• ${m.summary}`).join("\n\n");
       }
     }
 
-    const finalSystem = systemPrompt + contextStr + tasksStr;
+    const finalSystem = systemPrompt + contextStr + memoryStr;
 
     const response = await client.messages.create({
       model: "claude-opus-4-5",
@@ -69,80 +52,18 @@ export async function POST(req: NextRequest) {
     });
 
     let text = "";
-
     for (const block of response.content) {
       if (block.type === "text") {
         text += block.text;
       }
     }
 
-    // حفظ رد الموظف
-    await supabase.from("conversations").insert({
-      member: member,
-      role: "assistant",
-      message: text,
-    });
-
-    // إنشاء مهمة تلقائياً
-    const taskMatch = text.match(/TASK:\s*member=(\w+)\s*\|\s*task=(.+)/i);
-
-    if (taskMatch) {
-
-      const memberName = taskMatch[1];
-      const taskText = taskMatch[2];
-
-      await supabase.from("tasks").insert({
-        member: memberName,
-        task: taskText,
-        status: "pending",
-      });
-
-    }
-
-    // تشغيل اجتماع الفريق
-    if (text.includes("MEETING: team")) {
-
-      const teamMembers = ["rahaf", "noura", "mohammed", "saad"];
-      let meetingReport = "\n\n--- تقرير اجتماع الفريق ---\n";
-
-      for (const m of teamMembers) {
-
-        const memberPrompt = `
-أنت موظف في فريق خاص.
-قدم تقريراً مختصراً من 3 نقاط عن عملك اليومي وتوصية عملية واحدة.
-`;
-
-        const memberResponse = await client.messages.create({
-          model: "claude-opus-4-5",
-          max_tokens: 300,
-          system: memberPrompt,
-          messages: [{ role: "user", content: "اعطني تقريرك اليومي." }],
-        });
-
-        let memberText = "";
-
-        for (const block of memberResponse.content) {
-          if (block.type === "text") {
-            memberText += block.text;
-          }
-        }
-
-        meetingReport += `\n${m.toUpperCase()}:\n${memberText}\n`;
-      }
-
-      text += meetingReport;
-
-    }
-
     return NextResponse.json({ reply: text });
 
   } catch (error: any) {
-
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
     );
-
   }
-
 }
